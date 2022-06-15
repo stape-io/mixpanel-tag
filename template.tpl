@@ -151,6 +151,12 @@ ___TEMPLATE_PARAMETERS___
         "defaultValue": true
       },
       {
+        "type": "CHECKBOX",
+        "name": "trackFromVariable",
+        "checkboxText": "Get parameters from variable",
+        "simpleValueType": true
+      },
+      {
         "type": "SIMPLE_TABLE",
         "name": "trackParameters",
         "displayName": "Parameters (Optional)",
@@ -166,6 +172,28 @@ ___TEMPLATE_PARAMETERS___
             "displayName": "Value",
             "name": "value",
             "type": "TEXT"
+          }
+        ],
+        "enablingConditions": [
+          {
+            "paramName": "trackFromVariable",
+            "paramValue": false,
+            "type": "EQUALS"
+          }
+        ]
+      },
+      {
+        "type": "SELECT",
+        "name": "trackParametersObject",
+        "displayName": "Parameters object",
+        "macrosInSelect": true,
+        "selectItems": [],
+        "simpleValueType": true,
+        "enablingConditions": [
+          {
+            "paramName": "trackFromVariable",
+            "paramValue": true,
+            "type": "EQUALS"
           }
         ]
       }
@@ -222,6 +250,7 @@ const logToConsole = require('logToConsole');
 const getRequestHeader = require('getRequestHeader');
 const generateRandom = require('generateRandom');
 const parseUrl = require('parseUrl');
+const makeString = require('makeString');
 
 const containerVersion = getContainerVersion();
 const isDebug = containerVersion.debugMode;
@@ -261,10 +290,16 @@ function sendTrackRequest() {
         postBody = trackCommonData(postBody);
     }
 
-    if (data.trackParameters) {
+    if (!data.trackFromVariable && data.trackParameters) {
         data.trackParameters.forEach(d => {
             postBody.properties[d.name] = d.value;
         });
+    }
+
+    if (data.trackFromVariable && data.trackParametersObject) {
+        for (let key in data.trackParametersObject) {
+            postBody.properties[key] = data.trackParametersObject[key];
+        }
     }
 
     sendRequest(data.trackName, postBody);
@@ -349,8 +384,8 @@ function getDeviceId(distinctId) {
 }
 
 function setDistinctIdCookies(distinctId, deviceId) {
-    setCookie('stape_mixpanel_distinct_id', distinctId, cookieOptions);
-    setCookie('stape_mixpanel_device_id', deviceId, cookieOptions);
+    setCookie('stape_mixpanel_distinct_id', makeString(distinctId), cookieOptions);
+    setCookie('stape_mixpanel_device_id', makeString(deviceId), cookieOptions);
 }
 
 function trackCommonData(postBody) {
@@ -407,7 +442,7 @@ function trackCommonData(postBody) {
     if (initialReferrer) postBody.properties['$initial_referrer'] = initialReferrer;
     if (!initialReferrer) {
         postBody.properties['$initial_referrer'] = postBody.properties['$referrer'] ? postBody.properties['$referrer'] : 'direct';
-        setCookie('stape_mixpanel_initial_referrer', postBody.properties['$initial_referrer'], cookieOptions);
+        setCookie('stape_mixpanel_initial_referrer', makeString(postBody.properties['$initial_referrer']), cookieOptions);
     }
 
     if (postBody.properties['$initial_referrer'] && postBody.properties['$initial_referrer'] !== 'direct') postBody.properties['$initial_referring_domain'] = parseUrl(postBody.properties['$initial_referrer']).hostname;
