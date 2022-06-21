@@ -1,4 +1,6 @@
 homepage: "https://stape.io/"
 versions:
+  - sha: 9c64ffe6b2160224ba7fd1e9c62c2a7929a0b1ef
+    changeNotes: Add parameters variable support.
   - sha: f883b90a33f7e69e347af0d6ffffd039a69e987c
     changeNotes: Initial release.
