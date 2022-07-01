@@ -1,5 +1,7 @@
 homepage: "https://stape.io/"
 versions:
+  - sha: b19f50e02c9a33555129e52c0de92a5edb5b8d2b
+    changeNotes: Fix bug with referer permissions.
   - sha: 49a81a3b9b022e3a1058d40dd2cacde8ab5ea6ee
     changeNotes: Add browser version detection.
   - sha: 9c64ffe6b2160224ba7fd1e9c62c2a7929a0b1ef
