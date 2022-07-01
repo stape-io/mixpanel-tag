@@ -608,7 +608,7 @@ ___SERVER_PERMISSIONS___
                 "mapValue": [
                   {
                     "type": 1,
-                    "string": "referrer"
+                    "string": "referer"
                   }
                 ]
               }
