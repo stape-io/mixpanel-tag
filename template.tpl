@@ -157,32 +157,6 @@ ___TEMPLATE_PARAMETERS___
         "simpleValueType": true
       },
       {
-        "type": "SIMPLE_TABLE",
-        "name": "trackParameters",
-        "displayName": "Parameters (Optional)",
-        "simpleTableColumns": [
-          {
-            "defaultValue": "",
-            "displayName": "Parameter Name",
-            "name": "name",
-            "type": "TEXT"
-          },
-          {
-            "defaultValue": "",
-            "displayName": "Value",
-            "name": "value",
-            "type": "TEXT"
-          }
-        ],
-        "enablingConditions": [
-          {
-            "paramName": "trackFromVariable",
-            "paramValue": false,
-            "type": "EQUALS"
-          }
-        ]
-      },
-      {
         "type": "SELECT",
         "name": "trackParametersObject",
         "displayName": "Parameters object",
@@ -196,6 +170,39 @@ ___TEMPLATE_PARAMETERS___
             "type": "EQUALS"
           }
         ]
+      },
+      {
+        "type": "SIMPLE_TABLE",
+        "name": "trackParameters",
+        "displayName": "Additional Parameters (Optional)",
+        "simpleTableColumns": [
+          {
+            "defaultValue": "",
+            "displayName": "Parameter Name",
+            "name": "name",
+            "type": "TEXT"
+          },
+          {
+            "defaultValue": "",
+            "displayName": "Value",
+            "name": "value",
+            "type": "TEXT"
+          }
+        ]
+      },
+      {
+        "type": "SIMPLE_TABLE",
+        "name": "trackParametersRemove",
+        "displayName": "Remove parameters from the request",
+        "simpleTableColumns": [
+          {
+            "defaultValue": "",
+            "displayName": "Parameter Name",
+            "name": "name",
+            "type": "TEXT"
+          }
+        ],
+        "help": "Useful for removing common parameters like $current_url or ip"
       }
     ],
     "enablingConditions": [
@@ -251,6 +258,8 @@ const getRequestHeader = require('getRequestHeader');
 const generateRandom = require('generateRandom');
 const parseUrl = require('parseUrl');
 const makeString = require('makeString');
+const Object = require('Object');
+const makeNumber = require('makeNumber');
 
 const containerVersion = getContainerVersion();
 const isDebug = containerVersion.debugMode;
@@ -290,16 +299,22 @@ function sendTrackRequest() {
         postBody = trackCommonData(postBody);
     }
 
-    if (!data.trackFromVariable && data.trackParameters) {
+    if (data.trackFromVariable && data.trackParametersObject) {
+        for (let key in data.trackParametersObject) {
+            postBody.properties[key] = data.trackParametersObject[key];
+        }
+    }
+
+    if (data.trackParameters) {
         data.trackParameters.forEach(d => {
             postBody.properties[d.name] = d.value;
         });
     }
 
-    if (data.trackFromVariable && data.trackParametersObject) {
-        for (let key in data.trackParametersObject) {
-            postBody.properties[key] = data.trackParametersObject[key];
-        }
+    if (data.trackParametersRemove) {
+        data.trackParametersRemove.forEach(d => {
+            Object.delete(postBody.properties, d.name);
+        });
     }
 
     sendRequest(data.trackName, postBody);
@@ -432,10 +447,12 @@ function trackCommonData(postBody) {
         let os = getOS(postBody.properties.user_agent);
         let device = getDevice(postBody.properties.user_agent);
         let browser = getBrowser(postBody.properties.user_agent);
+        let browserVersion = getBrowserVersion(postBody.properties.user_agent, browser);
 
         if (os) postBody.properties['$os'] = os;
         if (device) postBody.properties['$device'] = device;
         if (browser) postBody.properties['$browser'] = browser;
+        if (browserVersion) postBody.properties['$browser_version'] = browserVersion;
     }
 
     let initialReferrer = getCookieValues('stape_mixpanel_initial_referrer')[0];
@@ -450,45 +467,78 @@ function trackCommonData(postBody) {
     return postBody;
 }
 
-function getOS(user_agent) {
-    if (user_agent.toLowerCase().match('windows') && user_agent.match('Phone')) return 'Windows Mobile';
-    else if (user_agent.toLowerCase().match('windows')) return 'Windows';
-    else if (user_agent.match('(iPhone|iPad|iPod)')) return 'iOS';
-    else if (user_agent.match('Android')) return 'Android';
-    else if (user_agent.match('(BlackBerry|PlayBook|BB10)')) return 'BlackBerry';
-    else if (user_agent.match('Mac')) return 'Mac OS X';
-    else if (user_agent.match('Linux')) return 'Linux';
+function getOS(userAgent) {
+    if (userAgent.toLowerCase().match('windows') && userAgent.match('Phone')) return 'Windows Mobile';
+    else if (userAgent.toLowerCase().match('windows')) return 'Windows';
+    else if (userAgent.match('(iPhone|iPad|iPod)')) return 'iOS';
+    else if (userAgent.match('Android')) return 'Android';
+    else if (userAgent.match('(BlackBerry|PlayBook|BB10)')) return 'BlackBerry';
+    else if (userAgent.match('Mac')) return 'Mac OS X';
+    else if (userAgent.match('Linux')) return 'Linux';
 
     return '';
 }
 
-function getDevice(user_agent) {
-    if (user_agent.match('iPad')) return 'iPad';
-    else if (user_agent.match('iPod')) return 'iPod Touch';
-    else if (user_agent.match('iPhone')) return 'iPhone';
-    else if (user_agent.toLowerCase().match('(blackberry|playbook|bb10)')) return 'BlackBerry';
-    else if (user_agent.toLowerCase().match('windows phone')) return 'Windows Phone';
-    else if (user_agent.match('Android')) return 'Android';
+function getDevice(userAgent) {
+    if (userAgent.match('iPad')) return 'iPad';
+    else if (userAgent.match('iPod')) return 'iPod Touch';
+    else if (userAgent.match('iPhone')) return 'iPhone';
+    else if (userAgent.toLowerCase().match('(blackberry|playbook|bb10)')) return 'BlackBerry';
+    else if (userAgent.toLowerCase().match('windows phone')) return 'Windows Phone';
+    else if (userAgent.match('Android')) return 'Android';
 
     return '';
 }
 
-function getBrowser(user_agent) {
-    if (user_agent.match('Opera Mini')) return 'Opera Mini';
-    if (user_agent.match('Opera')) return 'Opera';
-    if (user_agent.toLowerCase().match('(BlackBerry|PlayBook|BB10)')) return 'BlackBerry';
-    if (user_agent.match('FBIOS')) return 'Facebook Mobile';
-    if (user_agent.match('Chrome')) return 'Chrome';
-    if (user_agent.match('CriOS')) return 'Chrome iOS';
-    if (user_agent.match('Apple') && user_agent.match('Mobile')) return 'Mobile Safari';
-    if (user_agent.match('Apple')) return 'Safari';
-    if (user_agent.match('Android')) return 'Android Mobile';
-    if (user_agent.match('Konqueror')) return 'Konqueror';
-    if (user_agent.match('Firefox')) return 'Firefox';
-    if (user_agent.match('MSIE') || user_agent.match('Trident')) return 'Internet Explorer';
-    if (user_agent.match('Gecko')) return 'Mozilla';
+function getBrowser(userAgent) {
+    if (userAgent.match('Opera Mini')) return 'Opera Mini';
+    if (userAgent.match('Opera')) return 'Opera';
+    if (userAgent.toLowerCase().match('(BlackBerry|PlayBook|BB10)')) return 'BlackBerry';
+    if (userAgent.match('FBIOS')) return 'Facebook Mobile';
+    if (userAgent.match('Chrome')) return 'Chrome';
+    if (userAgent.match('CriOS')) return 'Chrome iOS';
+    if (userAgent.match('Apple') && userAgent.match('Mobile')) return 'Mobile Safari';
+    if (userAgent.match('Apple')) return 'Safari';
+    if (userAgent.match('Android')) return 'Android Mobile';
+    if (userAgent.match('Konqueror')) return 'Konqueror';
+    if (userAgent.match('Firefox')) return 'Firefox';
+    if (userAgent.match('MSIE') || userAgent.match('Trident')) return 'Internet Explorer';
+    if (userAgent.match('Gecko')) return 'Mozilla';
 
     return '';
+}
+
+function getBrowserVersion(userAgent, browser) {
+    const versionRegexs = {
+        'Internet Explorer Mobile': 'rv:([0-9]+(.[0-9]+)?)',
+        'Microsoft Edge': 'Edge?/([0-9]+(.[0-9]+)?)',
+        'Chrome': 'Chrome/([0-9]+(.[0-9]+)?)',
+        'Chrome iOS': 'CriOS/([0-9]+(.[0-9]+)?)',
+        'UC Browser' : '(UCBrowser|UCWEB)/([0-9]+(.[0-9]+)?)',
+        'Safari': 'Version/([0-9]+(.[0-9]+)?)',
+        'Mobile Safari': 'Version/([0-9]+(.[0-9]+)?)',
+        'Opera': '(Opera|OPR)/([0-9]+(.[0-9]+)?)',
+        'Firefox': 'Firefox/([0-9]+(.[0-9]+)?)',
+        'Firefox iOS': 'FxiOS/([0-9]+(.[0-9]+)?)',
+        'Konqueror': 'Konqueror:([0-9]+(.[0-9]+)?)',
+        'BlackBerry': 'BlackBerry ([0-9]+(.[0-9]+)?)',
+        'Android Mobile': 'android.([0-9]+(.[0-9]+)?)',
+        'Samsung Internet': 'SamsungBrowser/([0-9]+(.[0-9]+)?)',
+        'Internet Explorer': '(rv:|MSIE )([0-9]+(.[0-9]+)?)',
+        'Mozilla': 'rv:([0-9]+(.[0-9]+)?)'
+    };
+
+    let regex = versionRegexs[browser];
+    if (regex === undefined) {
+        return null;
+    }
+
+    let matches = userAgent.match(regex);
+    if (!matches) {
+        return null;
+    }
+
+    return makeNumber(matches[matches.length - 2]);
 }
 
 function getSearchEngine(referrer) {
