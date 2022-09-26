@@ -32,6 +32,8 @@ if (data.type === 'track') {
     sendTrackRequest();
 } else if (data.type === 'alias') {
     sendAliasRequest();
+} else if (data.type === 'identify') {
+    sendIdentifyRequest();
 } else if (data.type === 'reset') {
     cookieOptions['max-age'] = 1;
 
@@ -80,15 +82,27 @@ function sendAliasRequest() {
     });
 }
 
+function sendIdentifyRequest() {
+    sendRequest('$identify', {
+        properties: {
+            '$identified_id': data.identifier,
+            '$anon_id': getDistinctId()
+        }
+    });
+}
+
 function sendRequest(eventName, postBody) {
     postBody.event = eventName;
 
     if (!postBody.properties) postBody.properties = {};
     postBody.properties.token = data.token;
-    postBody.properties.distinct_id = getDistinctId();
-    postBody.properties['$device_id'] = getDeviceId(postBody.properties.distinct_id);
 
-    if (data.identifyAuto) setDistinctIdCookies(postBody.properties.distinct_id, postBody.properties['$device_id']);
+    if (data.type !== 'identify') {
+        postBody.properties.distinct_id = getDistinctId();
+        postBody.properties['$device_id'] = getDeviceId(postBody.properties.distinct_id);
+
+        if (data.identifyAuto) setDistinctIdCookies(postBody.properties.distinct_id, postBody.properties['$device_id']);
+    }
 
     const postUrl = 'https://' + (data.serverEU ? 'api-eu.mixpanel.com' : 'api.mixpanel.com') + '/track?verbose=1';
     postBody = [postBody];
@@ -135,7 +149,7 @@ function getDistinctId() {
     let distinctIdCookie = getCookieValues('stape_mixpanel_distinct_id')[0];
     if (distinctIdCookie) return distinctIdCookie;
 
-    return 's-' + getTimestampMillis() + '-' + generateRandom(100000, 999999) + '-' + generateRandom(100000, 999999);
+    return 's-' + getTimestampMillis() + '-' + generateRandom(100000, 999999) + '-' + generateRandom(100000, 999999) + '-' + generateRandom(100000, 999999);
 }
 
 function getDeviceId(distinctId) {
