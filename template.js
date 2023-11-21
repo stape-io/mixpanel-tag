@@ -34,15 +34,93 @@ if (data.type === 'track') {
     sendAliasRequest();
 } else if (data.type === 'identify') {
     sendIdentifyRequest();
+} else if (data.type === 'profile-set') {
+    sendSetProfileRequest();
+} else if (data.type === 'profile-append') {
+    sendAppendProfileRequest();
 } else if (data.type === 'reset') {
     cookieOptions['max-age'] = 1;
-
     setCookie('stape_mixpanel_distinct_id', 'empty', cookieOptions);
     setCookie('stape_mixpanel_device_id', 'empty', cookieOptions);
     data.gtmOnSuccess();
-
     return;
 }
+
+
+function sendAppendProfileRequest() {
+    // Construct the properties to append from the table field input
+    const propertiesToAppend = {};
+    data.userPropertiesToAppend.forEach(row => {
+        if (!propertiesToAppend[row.propertyName]) {
+            propertiesToAppend[row.propertyName] = [];
+        }
+        propertiesToAppend[row.propertyName].push(row.valueToAppend);
+    });
+
+    const profileBody = {
+        '$token': data.token,
+        '$distinct_id': getDistinctId(),
+        '$append': propertiesToAppend
+    };
+
+    const postUrl = 'https://' + (data.serverEU ? 'api-eu.mixpanel.com' : 'api.mixpanel.com') + '/engage#profile-list-append';
+
+    sendHttpRequest(postUrl, (statusCode, headers, body) => {
+        // Logging response
+        if (isLoggingEnabled) {
+            logToConsole('Append Profile Request Response: ' + JSON.stringify({
+                'statusCode': statusCode,
+                'headers': headers,
+                'body': body
+            }));
+        }
+
+        // Handling response
+        if (statusCode >= 200 && statusCode < 400) {
+            data.gtmOnSuccess();
+        } else {
+            data.gtmOnFailure();
+        }
+    }, {headers: {'Content-Type': 'application/json'}, method: 'POST'}, JSON.stringify([profileBody]));
+}
+
+
+
+
+function sendSetProfileRequest() {
+    // Construct user properties object from the table field input
+    const userProperties = {};
+    data.userPropertiesTable.forEach(row => {
+        userProperties[row.userProperty] = row.value;
+    });
+
+    const profileBody = {
+        '$token': data.token,
+        '$distinct_id': getDistinctId(),
+        '$set': userProperties
+    };
+
+    const postUrl = 'https://' + (data.serverEU ? 'api-eu.mixpanel.com' : 'api.mixpanel.com') + '/engage#profile-set';
+    
+    sendHttpRequest(postUrl, (statusCode, headers, body) => {
+        // Logging response
+        if (isLoggingEnabled) {
+            logToConsole('Set Profile Request Response: ' + JSON.stringify({
+                'statusCode': statusCode,
+                'headers': headers,
+                'body': body
+            }));
+        }
+
+        // Handling response
+        if (statusCode >= 200 && statusCode < 400) {
+            data.gtmOnSuccess();
+        } else {
+            data.gtmOnFailure();
+        }
+    }, {headers: {'Content-Type': 'application/json'}, method: 'POST'}, JSON.stringify([profileBody]));
+}
+
 
 function sendTrackRequest() {
     let postBody = {
