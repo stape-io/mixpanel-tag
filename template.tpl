@@ -1,4 +1,4 @@
-﻿___TERMS_OF_SERVICE___
+___TERMS_OF_SERVICE___
 
 By creating or modifying this file you agree to Google Tag Manager's Community
 Template Gallery Developer Terms of Service available at
@@ -15,8 +15,8 @@ ___INFO___
   "securityGroups": [],
   "displayName": "Mixpanel",
   "brand": {
-    "id": "brand_dummy",
-    "displayName": "Custom Template",
+    "id": "github.com_stape-io",
+    "displayName": "stape-io",
     "thumbnail": "data:image/png;base64,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\u003d\u003d"
   },
   "description": "Utilizes Mixpanel server API for user and event tracking.",
@@ -62,6 +62,14 @@ ___TEMPLATE_PARAMETERS___
       {
         "value": "reset",
         "displayValue": "reset"
+      },
+      {
+        "value": "profile-set",
+        "displayValue": "set"
+      },
+      {
+        "value": "profile-append",
+        "displayValue": "append"
       }
     ],
     "simpleValueType": true,
@@ -98,6 +106,74 @@ ___TEMPLATE_PARAMETERS___
       {
         "paramName": "identifyAuto",
         "paramValue": false,
+        "type": "EQUALS"
+      }
+    ]
+  },
+  {
+    "type": "GROUP",
+    "name": "appendGroup",
+    "displayName": "User Properties to append",
+    "groupStyle": "ZIPPY_OPEN",
+    "subParams": [
+      {
+        "type": "SIMPLE_TABLE",
+        "name": "userPropertiesToAppend",
+        "displayName": "",
+        "simpleTableColumns": [
+          {
+            "defaultValue": "",
+            "displayName": "User Property",
+            "name": "propertyName",
+            "type": "TEXT"
+          },
+          {
+            "defaultValue": "",
+            "displayName": "Value",
+            "name": "valueToAppend",
+            "type": "TEXT"
+          }
+        ]
+      }
+    ],
+    "enablingConditions": [
+      {
+        "paramName": "type",
+        "paramValue": "profile-append",
+        "type": "EQUALS"
+      }
+    ]
+  },
+  {
+    "type": "GROUP",
+    "name": "setGroup",
+    "displayName": "User Properties",
+    "groupStyle": "ZIPPY_OPEN",
+    "subParams": [
+      {
+        "type": "SIMPLE_TABLE",
+        "name": "userPropertiesTable",
+        "displayName": "",
+        "simpleTableColumns": [
+          {
+            "defaultValue": "",
+            "displayName": "User Property",
+            "name": "userProperty",
+            "type": "TEXT"
+          },
+          {
+            "defaultValue": "",
+            "displayName": "Value",
+            "name": "value",
+            "type": "TEXT"
+          }
+        ]
+      }
+    ],
+    "enablingConditions": [
+      {
+        "paramName": "type",
+        "paramValue": "profile-set",
         "type": "EQUALS"
       }
     ]
@@ -312,15 +388,93 @@ if (data.type === 'track') {
     sendAliasRequest();
 } else if (data.type === 'identify') {
     sendIdentifyRequest();
+} else if (data.type === 'profile-set') {
+    sendSetProfileRequest();
+} else if (data.type === 'profile-append') {
+    sendAppendProfileRequest();
 } else if (data.type === 'reset') {
     cookieOptions['max-age'] = 1;
-
     setCookie('stape_mixpanel_distinct_id', 'empty', cookieOptions);
     setCookie('stape_mixpanel_device_id', 'empty', cookieOptions);
     data.gtmOnSuccess();
-
     return;
 }
+
+
+function sendAppendProfileRequest() {
+    // Construct the properties to append from the table field input
+    const propertiesToAppend = {};
+    data.userPropertiesToAppend.forEach(row => {
+        if (!propertiesToAppend[row.propertyName]) {
+            propertiesToAppend[row.propertyName] = [];
+        }
+        propertiesToAppend[row.propertyName].push(row.valueToAppend);
+    });
+
+    const profileBody = {
+        '$token': data.token,
+        '$distinct_id': getDistinctId(),
+        '$append': propertiesToAppend
+    };
+
+    const postUrl = 'https://' + (data.serverEU ? 'api-eu.mixpanel.com' : 'api.mixpanel.com') + '/engage#profile-list-append';
+
+    sendHttpRequest(postUrl, (statusCode, headers, body) => {
+        // Logging response
+        if (isLoggingEnabled) {
+            logToConsole('Append Profile Request Response: ' + JSON.stringify({
+                'statusCode': statusCode,
+                'headers': headers,
+                'body': body
+            }));
+        }
+
+        // Handling response
+        if (statusCode >= 200 && statusCode < 400) {
+            data.gtmOnSuccess();
+        } else {
+            data.gtmOnFailure();
+        }
+    }, {headers: {'Content-Type': 'application/json'}, method: 'POST'}, JSON.stringify([profileBody]));
+}
+
+
+
+
+function sendSetProfileRequest() {
+    // Construct user properties object from the table field input
+    const userProperties = {};
+    data.userPropertiesTable.forEach(row => {
+        userProperties[row.userProperty] = row.value;
+    });
+
+    const profileBody = {
+        '$token': data.token,
+        '$distinct_id': getDistinctId(),
+        '$set': userProperties
+    };
+
+    const postUrl = 'https://' + (data.serverEU ? 'api-eu.mixpanel.com' : 'api.mixpanel.com') + '/engage#profile-set';
+    
+    sendHttpRequest(postUrl, (statusCode, headers, body) => {
+        // Logging response
+        if (isLoggingEnabled) {
+            logToConsole('Set Profile Request Response: ' + JSON.stringify({
+                'statusCode': statusCode,
+                'headers': headers,
+                'body': body
+            }));
+        }
+
+        // Handling response
+        if (statusCode >= 200 && statusCode < 400) {
+            data.gtmOnSuccess();
+        } else {
+            data.gtmOnFailure();
+        }
+    }, {headers: {'Content-Type': 'application/json'}, method: 'POST'}, JSON.stringify([profileBody]));
+}
+
 
 function sendTrackRequest() {
     let postBody = {
