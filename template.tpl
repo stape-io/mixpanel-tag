@@ -16,7 +16,7 @@ ___INFO___
   "displayName": "Mixpanel",
   "brand": {
     "id": "github.com_stape-io",
-    "displayName": "stape-io & Mariusz Brucki",
+    "displayName": "stape-io",
     "thumbnail": "data:image/png;base64,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\u003d\u003d"
   },
   "description": "Utilizes Mixpanel server API for user and event tracking.",
@@ -366,6 +366,7 @@ const parseUrl = require('parseUrl');
 const makeString = require('makeString');
 const Object = require('Object');
 const makeNumber = require('makeNumber');
+const postUrl = 'https://' + (data.serverEU ? 'api-eu.mixpanel.com' : 'api.mixpanel.com');
 
 const containerVersion = getContainerVersion();
 const isDebug = containerVersion.debugMode;
@@ -402,7 +403,6 @@ if (data.type === 'track') {
 
 
 function sendAppendProfileRequest() {
-    // Construct the properties to append from the table field input
     const propertiesToAppend = {};
     data.userPropertiesToAppend.forEach(row => {
         if (!propertiesToAppend[row.propertyName]) {
@@ -417,19 +417,37 @@ function sendAppendProfileRequest() {
         '$append': propertiesToAppend
     };
 
-    const postUrl = 'https://' + (data.serverEU ? 'api-eu.mixpanel.com' : 'api.mixpanel.com') + '/engage#profile-list-append';
+    const postUrlAppend = postUrl + '/engage#profile-list-append';
 
-    sendHttpRequest(postUrl, (statusCode, headers, body) => {
-        // Logging response
+    // Logging the request if logging is enabled
+    if (isLoggingEnabled) {
+        logToConsole(JSON.stringify({
+            'Name': 'Mixpanel',
+            'Type': 'Request',
+            'TraceId': traceId,
+            'EventName': 'Profile Append',
+            'RequestMethod': 'POST',
+            'RequestUrl': postUrlAppend,
+            'RequestBody': profileBody,
+        }));
+    }
+
+    // Sending the HTTP request to Mixpanel
+    sendHttpRequest(postUrlAppend, (statusCode, headers, body) => {
+        // Logging the response if logging is enabled
         if (isLoggingEnabled) {
-            logToConsole('Append Profile Request Response: ' + JSON.stringify({
-                'statusCode': statusCode,
-                'headers': headers,
-                'body': body
+            logToConsole(JSON.stringify({
+                'Name': 'Mixpanel',
+                'Type': 'Response',
+                'TraceId': traceId,
+                'EventName': 'Profile Append',
+                'ResponseStatusCode': statusCode,
+                'ResponseHeaders': headers,
+                'ResponseBody': body,
             }));
         }
 
-        // Handling response
+        // Handling the response
         if (statusCode >= 200 && statusCode < 400) {
             data.gtmOnSuccess();
         } else {
@@ -441,8 +459,8 @@ function sendAppendProfileRequest() {
 
 
 
+
 function sendSetProfileRequest() {
-    // Construct user properties object from the table field input
     const userProperties = {};
     data.userPropertiesTable.forEach(row => {
         userProperties[row.userProperty] = row.value;
@@ -454,19 +472,37 @@ function sendSetProfileRequest() {
         '$set': userProperties
     };
 
-    const postUrl = 'https://' + (data.serverEU ? 'api-eu.mixpanel.com' : 'api.mixpanel.com') + '/engage#profile-set';
-    
-    sendHttpRequest(postUrl, (statusCode, headers, body) => {
-        // Logging response
+    const postUrlSet = postUrl + '/engage#profile-set';
+
+    // Logging the request if logging is enabled
+    if (isLoggingEnabled) {
+        logToConsole(JSON.stringify({
+            'Name': 'Mixpanel',
+            'Type': 'Request',
+            'TraceId': traceId,
+            'EventName': 'Profile Set',
+            'RequestMethod': 'POST',
+            'RequestUrl': postUrlSet,
+            'RequestBody': profileBody,
+        }));
+    }
+
+    // Sending the HTTP request to Mixpanel
+    sendHttpRequest(postUrlSet, (statusCode, headers, body) => {
+        // Logging the response if logging is enabled
         if (isLoggingEnabled) {
-            logToConsole('Set Profile Request Response: ' + JSON.stringify({
-                'statusCode': statusCode,
-                'headers': headers,
-                'body': body
+            logToConsole(JSON.stringify({
+                'Name': 'Mixpanel',
+                'Type': 'Response',
+                'TraceId': traceId,
+                'EventName': 'Profile Set',
+                'ResponseStatusCode': statusCode,
+                'ResponseHeaders': headers,
+                'ResponseBody': body,
             }));
         }
 
-        // Handling response
+        // Handling the response
         if (statusCode >= 200 && statusCode < 400) {
             data.gtmOnSuccess();
         } else {
@@ -474,6 +510,7 @@ function sendSetProfileRequest() {
         }
     }, {headers: {'Content-Type': 'application/json'}, method: 'POST'}, JSON.stringify([profileBody]));
 }
+
 
 
 function sendTrackRequest() {
