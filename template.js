@@ -12,6 +12,7 @@ const parseUrl = require('parseUrl');
 const makeString = require('makeString');
 const Object = require('Object');
 const makeNumber = require('makeNumber');
+const postUrl = 'https://' + (data.serverEU ? 'api-eu.mixpanel.com' : 'api.mixpanel.com');
 
 const containerVersion = getContainerVersion();
 const isDebug = containerVersion.debugMode;
@@ -48,7 +49,6 @@ if (data.type === 'track') {
 
 
 function sendAppendProfileRequest() {
-    // Construct the properties to append from the table field input
     const propertiesToAppend = {};
     data.userPropertiesToAppend.forEach(row => {
         if (!propertiesToAppend[row.propertyName]) {
@@ -63,19 +63,37 @@ function sendAppendProfileRequest() {
         '$append': propertiesToAppend
     };
 
-    const postUrl = 'https://' + (data.serverEU ? 'api-eu.mixpanel.com' : 'api.mixpanel.com') + '/engage#profile-list-append';
+    const postUrlAppend = postUrl + '/engage#profile-list-append';
 
-    sendHttpRequest(postUrl, (statusCode, headers, body) => {
-        // Logging response
+    // Logging the request if logging is enabled
+    if (isLoggingEnabled) {
+        logToConsole(JSON.stringify({
+            'Name': 'Mixpanel',
+            'Type': 'Request',
+            'TraceId': traceId,
+            'EventName': 'Profile Append',
+            'RequestMethod': 'POST',
+            'RequestUrl': postUrlAppend,
+            'RequestBody': profileBody,
+        }));
+    }
+
+    // Sending the HTTP request to Mixpanel
+    sendHttpRequest(postUrlAppend, (statusCode, headers, body) => {
+        // Logging the response if logging is enabled
         if (isLoggingEnabled) {
-            logToConsole('Append Profile Request Response: ' + JSON.stringify({
-                'statusCode': statusCode,
-                'headers': headers,
-                'body': body
+            logToConsole(JSON.stringify({
+                'Name': 'Mixpanel',
+                'Type': 'Response',
+                'TraceId': traceId,
+                'EventName': 'Profile Append',
+                'ResponseStatusCode': statusCode,
+                'ResponseHeaders': headers,
+                'ResponseBody': body,
             }));
         }
 
-        // Handling response
+        // Handling the response
         if (statusCode >= 200 && statusCode < 400) {
             data.gtmOnSuccess();
         } else {
@@ -87,8 +105,8 @@ function sendAppendProfileRequest() {
 
 
 
+
 function sendSetProfileRequest() {
-    // Construct user properties object from the table field input
     const userProperties = {};
     data.userPropertiesTable.forEach(row => {
         userProperties[row.userProperty] = row.value;
@@ -100,19 +118,37 @@ function sendSetProfileRequest() {
         '$set': userProperties
     };
 
-    const postUrl = 'https://' + (data.serverEU ? 'api-eu.mixpanel.com' : 'api.mixpanel.com') + '/engage#profile-set';
-    
-    sendHttpRequest(postUrl, (statusCode, headers, body) => {
-        // Logging response
+    const postUrlSet = postUrl + '/engage#profile-set';
+
+    // Logging the request if logging is enabled
+    if (isLoggingEnabled) {
+        logToConsole(JSON.stringify({
+            'Name': 'Mixpanel',
+            'Type': 'Request',
+            'TraceId': traceId,
+            'EventName': 'Profile Set',
+            'RequestMethod': 'POST',
+            'RequestUrl': postUrlSet,
+            'RequestBody': profileBody,
+        }));
+    }
+
+    // Sending the HTTP request to Mixpanel
+    sendHttpRequest(postUrlSet, (statusCode, headers, body) => {
+        // Logging the response if logging is enabled
         if (isLoggingEnabled) {
-            logToConsole('Set Profile Request Response: ' + JSON.stringify({
-                'statusCode': statusCode,
-                'headers': headers,
-                'body': body
+            logToConsole(JSON.stringify({
+                'Name': 'Mixpanel',
+                'Type': 'Response',
+                'TraceId': traceId,
+                'EventName': 'Profile Set',
+                'ResponseStatusCode': statusCode,
+                'ResponseHeaders': headers,
+                'ResponseBody': body,
             }));
         }
 
-        // Handling response
+        // Handling the response
         if (statusCode >= 200 && statusCode < 400) {
             data.gtmOnSuccess();
         } else {
@@ -120,6 +156,7 @@ function sendSetProfileRequest() {
         }
     }, {headers: {'Content-Type': 'application/json'}, method: 'POST'}, JSON.stringify([profileBody]));
 }
+
 
 
 function sendTrackRequest() {
