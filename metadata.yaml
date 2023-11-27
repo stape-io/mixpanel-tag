@@ -1,5 +1,7 @@
 homepage: "https://stape.io/"
 versions:
+  - sha: b2ee7ddb566c3820fcb3e9f9bab1250dbfca4723
+    changeNotes: Added new request options.
   - sha: 44287c154b13e12b7db8cd691e7a5ff868dcdcfc
     changeNotes: Add identify type.
   - sha: b19f50e02c9a33555129e52c0de92a5edb5b8d2b

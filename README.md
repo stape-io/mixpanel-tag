@@ -24,3 +24,7 @@
 ## Open Source
 
 Mixpanel Tag for GTM Server Side is developing and maintained by [Stape Team](https://stape.io/) under the Apache 2.0 license.
+
+Also, big thanks to our contributors:
+
+- [Mariusz Brucki](https://github.com/mbrucki)
