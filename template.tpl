@@ -690,11 +690,13 @@ function trackCommonData(postBody) {
         if (browserVersion) postBody.properties['$browser_version'] = browserVersion;
     }
 
-    let initialReferrer = getCookieValues('stape_mixpanel_initial_referrer')[0];
-    if (initialReferrer) postBody.properties['$initial_referrer'] = initialReferrer;
-    if (!initialReferrer) {
-        postBody.properties['$initial_referrer'] = postBody.properties['$referrer'] ? postBody.properties['$referrer'] : 'direct';
-        setCookie('stape_mixpanel_initial_referrer', makeString(postBody.properties['$initial_referrer']), cookieOptions);
+    if (!data.trackParametersRemove || !data.trackParametersRemove.some(el => el.name === '$initial_referrer')) {
+        let initialReferrer = getCookieValues('stape_mixpanel_initial_referrer')[0];
+        if (initialReferrer) postBody.properties['$initial_referrer'] = initialReferrer;
+        if (!initialReferrer) {
+            postBody.properties['$initial_referrer'] = postBody.properties['$referrer'] ? postBody.properties['$referrer'] : 'direct';
+            setCookie('stape_mixpanel_initial_referrer', makeString(postBody.properties['$initial_referrer']), cookieOptions);
+        }
     }
 
     if (postBody.properties['$initial_referrer'] && postBody.properties['$initial_referrer'] !== 'direct') postBody.properties['$initial_referring_domain'] = parseUrl(postBody.properties['$initial_referrer']).hostname;
