@@ -690,7 +690,7 @@ function trackCommonData(postBody) {
         if (browserVersion) postBody.properties['$browser_version'] = browserVersion;
     }
 
-    if (!data.trackParametersRemove || !data.trackParametersRemove.contains('$initial_referrer')) {
+    if (!data.trackParametersRemove || !data.trackParametersRemove.some(el => el.name === '$initial_referrer')) {
         let initialReferrer = getCookieValues('stape_mixpanel_initial_referrer')[0];
         if (initialReferrer) postBody.properties['$initial_referrer'] = initialReferrer;
         if (!initialReferrer) {
