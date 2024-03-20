@@ -1,5 +1,7 @@
 homepage: "https://stape.io/"
 versions:
+  - sha: ece085c45f600b93d6f12cf5c0de2ccf75f1a5f7
+    changeNotes: Initial_referrer cookie only set if not removed anyway.
   - sha: b2ee7ddb566c3820fcb3e9f9bab1250dbfca4723
     changeNotes: Added new request options.
   - sha: 44287c154b13e12b7db8cd691e7a5ff868dcdcfc
