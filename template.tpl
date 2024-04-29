@@ -298,6 +298,26 @@ ___TEMPLATE_PARAMETERS___
       },
       {
         "type": "SIMPLE_TABLE",
+        "name": "trackList",
+        "displayName": "Parameters as lists",
+        "simpleTableColumns": [
+          {
+            "defaultValue": "",
+            "displayName": "Parameter Name",
+            "name": "listName",
+            "type": "TEXT"
+          },
+          {
+            "defaultValue": "",
+            "displayName": "Values",
+            "name": "listValues",
+            "type": "TEXT"
+          }
+        ],
+        "help": "List of parameters separated by comma sent as a Data Type  \u003d \"list\". For Example: tags: tag1,tag2,tag3"
+      },
+      {
+        "type": "SIMPLE_TABLE",
         "name": "trackParametersRemove",
         "displayName": "Remove parameters from the request",
         "simpleTableColumns": [
@@ -533,6 +553,20 @@ function sendTrackRequest() {
             postBody.properties[d.name] = d.value;
         });
     }
+
+    if (data.trackList) {
+        data.trackList.forEach(d => {
+            // Check if listValues is a string and have commas
+            if (typeof d.listValues === 'string' && d.listValues.indexOf(',') !== -1) {
+                // Convert a string to an array of strings, removing whitespace characters and dividing by commas
+                postBody.properties[d.listName] = d.listValues.split(',').map(tag => tag.trim());
+            } else {
+                // If it is not a comma-delimited string, assign the value of listValues unchanged
+                postBody.properties[d.listName] = d.listValues;
+            }
+        });
+    }
+
 
     if (data.trackParametersRemove) {
         data.trackParametersRemove.forEach(d => {
