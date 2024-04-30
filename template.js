@@ -180,6 +180,19 @@ function sendTrackRequest() {
         });
     }
 
+    if (data.trackList) {
+        data.trackList.forEach(d => {
+            // Check if listValues is a string and have commas
+            if (typeof d.listValues === 'string' && d.listValues.indexOf(',') !== -1) {
+                // Convert a string to an array of strings, removing whitespace characters and dividing by commas
+                postBody.properties[d.listName] = d.listValues.split(',').map(tag => tag.trim());
+            } else {
+                // If it is not a comma-delimited string, assign the value of listValues unchanged
+                postBody.properties[d.listName] = d.listValues;
+            }
+        });
+    }
+    
     if (data.trackParametersRemove) {
         data.trackParametersRemove.forEach(d => {
             Object.delete(postBody.properties, d.name);
