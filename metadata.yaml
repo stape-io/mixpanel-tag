@@ -1,5 +1,7 @@
 homepage: "https://stape.io/"
 versions:
+  - sha: d105fb188c244d238979c69cf2e872b75da98aa5
+    changeNotes: Fix users localization data issue.
   - sha: 79465aca94ce60342e430d442b2ba98fe54f85f0
     changeNotes: Added support for parameters list.
   - sha: ece085c45f600b93d6f12cf5c0de2ccf75f1a5f7
