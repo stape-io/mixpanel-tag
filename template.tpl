@@ -489,6 +489,7 @@ function sendSetProfileRequest() {
     const profileBody = {
         '$token': data.token,
         '$distinct_id': getDistinctId(),
+        '$ip': eventData.ip_override || eventData.ip,
         '$set': userProperties
     };
 
