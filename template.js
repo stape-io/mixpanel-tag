@@ -305,10 +305,10 @@ function trackCommonData(postBody) {
     const url = eventData.page_location || getRequestHeader('referer');
     const urlParsed = parseUrl(url);
 
-    if (urlParsed && urlParsed.searchParams.utm_medium) postBody.properties['$utm_medium'] = urlParsed.searchParams.utm_medium;
-    if (urlParsed && urlParsed.searchParams.utm_source) postBody.properties['$utm_source'] = urlParsed.searchParams.utm_source;
-    if (urlParsed && urlParsed.searchParams.utm_campaign) postBody.properties['$utm_campaign'] = urlParsed.searchParams.utm_campaign;
-    if (urlParsed && urlParsed.searchParams.utm_content) postBody.properties['$utm_content'] = urlParsed.searchParams.utm_content;
+    if (urlParsed && urlParsed.searchParams.utm_medium) postBody.properties['utm_medium'] = urlParsed.searchParams.utm_medium;
+    if (urlParsed && urlParsed.searchParams.utm_source) postBody.properties['utm_source'] = urlParsed.searchParams.utm_source;
+    if (urlParsed && urlParsed.searchParams.utm_campaign) postBody.properties['utm_campaign'] = urlParsed.searchParams.utm_campaign;
+    if (urlParsed && urlParsed.searchParams.utm_content) postBody.properties['utm_content'] = urlParsed.searchParams.utm_content;
 
     if (postBody.properties['$referrer']) {
         let searchEngine = getSearchEngine(postBody.properties['$referrer']);
