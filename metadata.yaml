@@ -1,5 +1,7 @@
 homepage: "https://stape.io/"
 versions:
+  - sha: 08caf7f12c53469ee358455489c3168511101c43
+    changeNotes: Fix the way the UTMs are being sent.
   - sha: d105fb188c244d238979c69cf2e872b75da98aa5
     changeNotes: Fix users localization data issue.
   - sha: 79465aca94ce60342e430d442b2ba98fe54f85f0
