@@ -12,14 +12,16 @@ const parseUrl = require('parseUrl');
 const makeString = require('makeString');
 const Object = require('Object');
 const makeNumber = require('makeNumber');
-const postUrl = 'https://' + (data.serverEU ? 'api-eu.mixpanel.com' : 'api.mixpanel.com');
+const getTimestamp = require('getTimestamp');
 
+const postUrl = 'https://' + (data.serverEU ? 'api-eu.mixpanel.com' : 'api.mixpanel.com');
 const containerVersion = getContainerVersion();
 const isDebug = containerVersion.debugMode;
 const isLoggingEnabled = determinateIsLoggingEnabled();
 const traceId = getRequestHeader('trace-id');
-
 const eventData = getAllEventData();
+
+
 let cookieOptions = {
     domain: 'auto',
     path: '/',
@@ -46,7 +48,6 @@ if (data.type === 'track') {
     data.gtmOnSuccess();
     return;
 }
-
 
 function sendAppendProfileRequest() {
     const propertiesToAppend = {};
@@ -102,10 +103,6 @@ function sendAppendProfileRequest() {
     }, {headers: {'Content-Type': 'application/json'}, method: 'POST'}, JSON.stringify([profileBody]));
 }
 
-
-
-
-
 function sendSetProfileRequest() {
     const userProperties = {};
     data.userPropertiesTable.forEach(row => {
@@ -158,8 +155,6 @@ function sendSetProfileRequest() {
     }, {headers: {'Content-Type': 'application/json'}, method: 'POST'}, JSON.stringify([profileBody]));
 }
 
-
-
 function sendTrackRequest() {
     let postBody = {
         properties: {}
@@ -193,7 +188,8 @@ function sendTrackRequest() {
             }
         });
     }
-    
+
+
     if (data.trackParametersRemove) {
         data.trackParametersRemove.forEach(d => {
             Object.delete(postBody.properties, d.name);
@@ -278,7 +274,7 @@ function getDistinctId() {
     let distinctIdCookie = getCookieValues('stape_mixpanel_distinct_id')[0];
     if (distinctIdCookie) return distinctIdCookie;
 
-    return 's-' + getTimestampMillis() + '-' + generateRandom(100000, 999999) + '-' + generateRandom(100000, 999999) + '-' + generateRandom(100000, 999999);
+    return UUID();
 }
 
 function getDeviceId(distinctId) {
@@ -445,6 +441,21 @@ function getSearchEngine(referrer) {
     else if (referrer.search('https?://(.*)duckduckgo.com') === 0) return 'duckduckgo';
 
     return null;
+}
+
+function random() {
+    return generateRandom(1000000000000000, 10000000000000000)/10000000000000000;
+  }
+  
+function UUID() {
+    function s(n) { return h((random() * (1<<(n<<2)))^getTimestamp()).slice(-n); }
+    function h(n) { return (n|0).toString(16); }
+    return  [
+        s(4) + s(4), s(4),
+        '4' + s(3),
+        h(8|(random()*4)) + s(3),
+        getTimestamp().toString(16).slice(-10) + s(2)
+    ].join('-');
 }
 
 function determinateIsLoggingEnabled() {
