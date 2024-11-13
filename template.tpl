@@ -386,15 +386,16 @@ const parseUrl = require('parseUrl');
 const makeString = require('makeString');
 const Object = require('Object');
 const makeNumber = require('makeNumber');
-const postUrl = 'https://' + (data.serverEU ? 'api-eu.mixpanel.com' : 'api.mixpanel.com');
 const getTimestamp = require('getTimestamp');
 
+const postUrl = 'https://' + (data.serverEU ? 'api-eu.mixpanel.com' : 'api.mixpanel.com');
 const containerVersion = getContainerVersion();
 const isDebug = containerVersion.debugMode;
 const isLoggingEnabled = determinateIsLoggingEnabled();
 const traceId = getRequestHeader('trace-id');
-
 const eventData = getAllEventData();
+
+
 let cookieOptions = {
     domain: 'auto',
     path: '/',
@@ -421,7 +422,6 @@ if (data.type === 'track') {
     data.gtmOnSuccess();
     return;
 }
-
 
 function sendAppendProfileRequest() {
     const propertiesToAppend = {};
@@ -477,10 +477,6 @@ function sendAppendProfileRequest() {
     }, {headers: {'Content-Type': 'application/json'}, method: 'POST'}, JSON.stringify([profileBody]));
 }
 
-
-
-
-
 function sendSetProfileRequest() {
     const userProperties = {};
     data.userPropertiesTable.forEach(row => {
@@ -532,8 +528,6 @@ function sendSetProfileRequest() {
         }
     }, {headers: {'Content-Type': 'application/json'}, method: 'POST'}, JSON.stringify([profileBody]));
 }
-
-
 
 function sendTrackRequest() {
     let postBody = {
