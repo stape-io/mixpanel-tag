@@ -1,5 +1,7 @@
 homepage: "https://stape.io/"
 versions:
+  - sha: 77f4014e15641af8677ee96b9a92b9ba42042989
+    changeNotes: Added generation UUID v4 for distinct_id.
   - sha: 08caf7f12c53469ee358455489c3168511101c43
     changeNotes: Fix the way the UTMs are being sent.
   - sha: d105fb188c244d238979c69cf2e872b75da98aa5
