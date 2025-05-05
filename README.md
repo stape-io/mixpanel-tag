@@ -4,6 +4,7 @@
 
 - Track - tracks Mixpanel events.
 - Alias - adds an alias to existing Mixpanel contact.
+- Set Once - sets user profile properties only if they are not already set.
 - Reset - resets identification of Mixpanel contact.
 
 
