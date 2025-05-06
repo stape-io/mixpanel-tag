@@ -41,6 +41,8 @@ if (data.type === 'track') {
     sendSetProfileRequest();
 } else if (data.type === 'profile-append') {
     sendAppendProfileRequest();
+} else if (data.type === 'profile-set-once') {
+    sendSetOnceProfileRequest();
 } else if (data.type === 'reset') {
     cookieOptions['max-age'] = 1;
     setCookie('stape_mixpanel_distinct_id', 'empty', cookieOptions);
@@ -140,6 +142,58 @@ function sendSetProfileRequest() {
                 'Type': 'Response',
                 'TraceId': traceId,
                 'EventName': 'Profile Set',
+                'ResponseStatusCode': statusCode,
+                'ResponseHeaders': headers,
+                'ResponseBody': body,
+            }));
+        }
+
+        // Handling the response
+        if (statusCode >= 200 && statusCode < 400) {
+            data.gtmOnSuccess();
+        } else {
+            data.gtmOnFailure();
+        }
+    }, {headers: {'Content-Type': 'application/json'}, method: 'POST'}, JSON.stringify([profileBody]));
+}
+
+function sendSetOnceProfileRequest() {
+    const userProperties = {};
+    data.userPropertiesToSetOnce.forEach(row => {
+        userProperties[row.userProperty] = row.value;
+    });
+
+    const profileBody = {
+        '$token': data.token,
+        '$distinct_id': getDistinctId(),
+        '$ip': eventData.ip_override || eventData.ip,
+        '$set_once': userProperties
+    };
+
+    const postUrlSetOnce = postUrl + '/engage#profile-set-once';
+
+    // Logging the request if logging is enabled
+    if (isLoggingEnabled) {
+        logToConsole(JSON.stringify({
+            'Name': 'Mixpanel',
+            'Type': 'Request',
+            'TraceId': traceId,
+            'EventName': 'Profile Set Once',
+            'RequestMethod': 'POST',
+            'RequestUrl': postUrlSetOnce,
+            'RequestBody': profileBody,
+        }));
+    }
+
+    // Sending the HTTP request to Mixpanel
+    sendHttpRequest(postUrlSetOnce, (statusCode, headers, body) => {
+        // Logging the response if logging is enabled
+        if (isLoggingEnabled) {
+            logToConsole(JSON.stringify({
+                'Name': 'Mixpanel',
+                'Type': 'Response',
+                'TraceId': traceId,
+                'EventName': 'Profile Set Once',
                 'ResponseStatusCode': statusCode,
                 'ResponseHeaders': headers,
                 'ResponseBody': body,

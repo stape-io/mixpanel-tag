@@ -344,6 +344,40 @@ ___TEMPLATE_PARAMETERS___
     ]
   },
   {
+    "type": "GROUP",
+    "name": "setOnceGroup",
+    "displayName": "User Properties to Set Once",
+    "groupStyle": "ZIPPY_OPEN",
+    "subParams": [
+      {
+        "type": "SIMPLE_TABLE",
+        "name": "userPropertiesToSetOnce",
+        "displayName": "",
+        "simpleTableColumns": [
+          {
+            "defaultValue": "",
+            "displayName": "User Property",
+            "name": "userProperty",
+            "type": "TEXT"
+          },
+          {
+            "defaultValue": "",
+            "displayName": "Value",
+            "name": "value",
+            "type": "TEXT"
+          }
+        ]
+      }
+    ],
+    "enablingConditions": [
+      {
+        "paramName": "type",
+        "paramValue": "profile-set-once",
+        "type": "EQUALS"
+      }
+    ]
+  },
+  {
     "displayName": "Logs Settings",
     "name": "logsGroup",
     "groupStyle": "ZIPPY_CLOSED",
