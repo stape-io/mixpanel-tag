@@ -358,7 +358,8 @@ ___TEMPLATE_PARAMETERS___
             "defaultValue": "",
             "displayName": "User Property",
             "name": "userProperty",
-            "type": "TEXT"
+            "type": "TEXT",
+            "isUnique": true
           },
           {
             "defaultValue": "",
@@ -413,7 +414,6 @@ ___SANDBOXED_JS_FOR_SERVER___
 const getAllEventData = require('getAllEventData');
 const JSON = require('JSON');
 const sendHttpRequest = require('sendHttpRequest');
-const getTimestampMillis = require('getTimestampMillis');
 const setCookie = require('setCookie');
 const getCookieValues = require('getCookieValues');
 const getContainerVersion = require('getContainerVersion');
@@ -426,13 +426,14 @@ const Object = require('Object');
 const makeNumber = require('makeNumber');
 const getTimestamp = require('getTimestamp');
 
+/**********************************************************************************************/
+
 const postUrl = 'https://' + (data.serverEU ? 'api-eu.mixpanel.com' : 'api.mixpanel.com');
 const containerVersion = getContainerVersion();
 const isDebug = containerVersion.debugMode;
 const isLoggingEnabled = determinateIsLoggingEnabled();
 const traceId = getRequestHeader('trace-id');
 const eventData = getAllEventData();
-
 
 let cookieOptions = {
     domain: 'auto',
@@ -463,6 +464,9 @@ if (data.type === 'track') {
     return;
 }
 
+/**********************************************************************************************/
+// Vendor related functions
+
 function sendAppendProfileRequest() {
     const propertiesToAppend = {};
     data.userPropertiesToAppend.forEach(row => {
@@ -480,7 +484,6 @@ function sendAppendProfileRequest() {
 
     const postUrlAppend = postUrl + '/engage#profile-list-append';
 
-    // Logging the request if logging is enabled
     if (isLoggingEnabled) {
         logToConsole(JSON.stringify({
             'Name': 'Mixpanel',
@@ -493,9 +496,7 @@ function sendAppendProfileRequest() {
         }));
     }
 
-    // Sending the HTTP request to Mixpanel
     sendHttpRequest(postUrlAppend, (statusCode, headers, body) => {
-        // Logging the response if logging is enabled
         if (isLoggingEnabled) {
             logToConsole(JSON.stringify({
                 'Name': 'Mixpanel',
@@ -508,60 +509,7 @@ function sendAppendProfileRequest() {
             }));
         }
 
-        // Handling the response
-        if (statusCode >= 200 && statusCode < 400) {
-            data.gtmOnSuccess();
-        } else {
-            data.gtmOnFailure();
-        }
-    }, {headers: {'Content-Type': 'application/json'}, method: 'POST'}, JSON.stringify([profileBody]));
-}
-
-function sendSetOnceProfileRequest() {
-    const userProperties = {};
-    data.userPropertiesToSetOnce.forEach(row => {
-        userProperties[row.userProperty] = row.value;
-    });
-
-    const profileBody = {
-        '$token': data.token,
-        '$distinct_id': getDistinctId(),
-        '$ip': eventData.ip_override || eventData.ip,
-        '$set_once': userProperties
-    };
-
-    const postUrlSetOnce = postUrl + '/engage#profile-set-once';
-
-    // Logging the request if logging is enabled
-    if (isLoggingEnabled) {
-        logToConsole(JSON.stringify({
-            'Name': 'Mixpanel',
-            'Type': 'Request',
-            'TraceId': traceId,
-            'EventName': 'Profile Set Once',
-            'RequestMethod': 'POST',
-            'RequestUrl': postUrlSetOnce,
-            'RequestBody': profileBody,
-        }));
-    }
-
-    // Sending the HTTP request to Mixpanel
-    sendHttpRequest(postUrlSetOnce, (statusCode, headers, body) => {
-        // Logging the response if logging is enabled
-        if (isLoggingEnabled) {
-            logToConsole(JSON.stringify({
-                'Name': 'Mixpanel',
-                'Type': 'Response',
-                'TraceId': traceId,
-                'EventName': 'Profile Set Once',
-                'ResponseStatusCode': statusCode,
-                'ResponseHeaders': headers,
-                'ResponseBody': body,
-            }));
-        }
-
-        // Handling the response
-        if (statusCode >= 200 && statusCode < 400) {
+        if (statusCode >= 200 && statusCode < 400 && body && body === '1') {
             data.gtmOnSuccess();
         } else {
             data.gtmOnFailure();
@@ -584,7 +532,6 @@ function sendSetProfileRequest() {
 
     const postUrlSet = postUrl + '/engage#profile-set';
 
-    // Logging the request if logging is enabled
     if (isLoggingEnabled) {
         logToConsole(JSON.stringify({
             'Name': 'Mixpanel',
@@ -597,9 +544,7 @@ function sendSetProfileRequest() {
         }));
     }
 
-    // Sending the HTTP request to Mixpanel
     sendHttpRequest(postUrlSet, (statusCode, headers, body) => {
-        // Logging the response if logging is enabled
         if (isLoggingEnabled) {
             logToConsole(JSON.stringify({
                 'Name': 'Mixpanel',
@@ -612,8 +557,55 @@ function sendSetProfileRequest() {
             }));
         }
 
-        // Handling the response
-        if (statusCode >= 200 && statusCode < 400) {
+        if (statusCode >= 200 && statusCode < 400 && body && body === '1') {
+            data.gtmOnSuccess();
+        } else {
+            data.gtmOnFailure();
+        }
+    }, {headers: {'Content-Type': 'application/json'}, method: 'POST'}, JSON.stringify([profileBody]));
+}
+
+function sendSetOnceProfileRequest() {
+    const userProperties = {};
+    data.userPropertiesToSetOnce.forEach(row => {
+        userProperties[row.userProperty] = row.value;
+    });
+
+    const profileBody = {
+        '$token': data.token,
+        '$distinct_id': getDistinctId(),
+        '$ip': eventData.ip_override || eventData.ip,
+        '$set_once': userProperties
+    };
+
+    const postUrlSetOnce = postUrl + '/engage#profile-set-once';
+
+    if (isLoggingEnabled) {
+        logToConsole(JSON.stringify({
+            'Name': 'Mixpanel',
+            'Type': 'Request',
+            'TraceId': traceId,
+            'EventName': 'Profile Set Once',
+            'RequestMethod': 'POST',
+            'RequestUrl': postUrlSetOnce,
+            'RequestBody': profileBody,
+        }));
+    }
+
+    sendHttpRequest(postUrlSetOnce, (statusCode, headers, body) => {
+        if (isLoggingEnabled) {
+            logToConsole(JSON.stringify({
+                'Name': 'Mixpanel',
+                'Type': 'Response',
+                'TraceId': traceId,
+                'EventName': 'Profile Set Once',
+                'ResponseStatusCode': statusCode,
+                'ResponseHeaders': headers,
+                'ResponseBody': body,
+            }));
+        }
+
+        if (statusCode >= 200 && statusCode < 400 && body && body === '1') {
             data.gtmOnSuccess();
         } else {
             data.gtmOnFailure();
@@ -723,7 +715,11 @@ function sendRequest(eventName, postBody) {
             }));
         }
 
-        if (statusCode >= 200 && statusCode < 400) {
+        // Because of ?verbose=1
+        let parsedBody;
+        if (body) parsedBody = JSON.parse(body);
+
+        if (statusCode >= 200 && statusCode < 400 && parsedBody && parsedBody.status === 1) {
             data.gtmOnSuccess();
         } else {
             data.gtmOnFailure();
@@ -909,9 +905,12 @@ function getSearchEngine(referrer) {
     return null;
 }
 
+/**********************************************************************************************/
+// Helpers
+
 function random() {
     return generateRandom(1000000000000000, 10000000000000000)/10000000000000000;
-  }
+}
   
 function UUID() {
     function s(n) { return h((random() * (1<<(n<<2)))^getTimestamp()).slice(-n); }
