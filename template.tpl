@@ -765,7 +765,6 @@ function trackCommonData(postBody) {
         }
     };
 
-    if (eventData.user_agent) postBody.properties.user_agent = eventData.user_agent;
     if (eventData.page_path) postBody.properties.path = eventData.page_path;
     if (eventData.page_location) postBody.properties['$current_url'] = eventData.page_location;
     if (eventData.screen_resolution) postBody.properties['$screen_width'] = eventData.screen_resolution.split('x')[0];
@@ -814,11 +813,11 @@ function trackCommonData(postBody) {
         }
     }
 
-    if (postBody.properties.user_agent) {
-        let os = getOS(postBody.properties.user_agent);
-        let device = getDevice(postBody.properties.user_agent);
-        let browser = getBrowser(postBody.properties.user_agent);
-        let browserVersion = getBrowserVersion(postBody.properties.user_agent, browser);
+    if (eventData.user_agentt) {
+        let os = getOS(eventData.user_agent);
+        let device = getDevice(eventData.user_agent);
+        let browser = getBrowser(eventData.user_agent);
+        let browserVersion = getBrowserVersion(eventData.user_agent, browser);
 
         if (os) postBody.properties['$os'] = os;
         if (device) postBody.properties['$device'] = device;
