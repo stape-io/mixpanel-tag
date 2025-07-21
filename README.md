@@ -11,6 +11,13 @@
 - Reset - resets identification of Mixpanel contact.
 
 
+> ⚠️ This tag currently supports only the **Original ID Merge** method of `ID Management`.
+>
+> An update to also support the **Simplified ID Merge** is already on our backlog.
+>
+> Learn more: [ID Management](https://docs.mixpanel.com/docs/tracking-methods/id-management), [Original ID Merge](https://docs.mixpanel.com/docs/tracking-methods/id-management/identifying-users-original), [Simplified ID Merge](https://docs.mixpanel.com/docs/tracking-methods/id-management/identifying-users-simplified) and [Migrating to Simplified ID Merge](https://docs.mixpanel.com/docs/tracking-methods/id-management/migrating-to-simplified-id-merge-system)
+
+
 **Mixpanel tag capabilities:**
 
 - `Automatically handle customer distinct_id` - Mixpanel server API optimized for stateless shared usage; e.g., in a web application, the same mixpanel instance is used across requests for all users. Rather than setting a `distinct_id` through `identity()` calls like Mixpanel client-side libraries (where a single Mixpanel instance is tied to a single user), this API requires you to pass the `distinct_id` with every tracking call.

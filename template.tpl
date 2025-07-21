@@ -776,10 +776,30 @@ function trackCommonData(postBody) {
     const url = eventData.page_location || getRequestHeader('referer');
     const urlParsed = parseUrl(url);
 
-    if (urlParsed && urlParsed.searchParams.utm_medium) postBody.properties['utm_medium'] = urlParsed.searchParams.utm_medium;
-    if (urlParsed && urlParsed.searchParams.utm_source) postBody.properties['utm_source'] = urlParsed.searchParams.utm_source;
-    if (urlParsed && urlParsed.searchParams.utm_campaign) postBody.properties['utm_campaign'] = urlParsed.searchParams.utm_campaign;
-    if (urlParsed && urlParsed.searchParams.utm_content) postBody.properties['utm_content'] = urlParsed.searchParams.utm_content;
+    // https://docs.mixpanel.com/docs/tracking-methods/sdks/javascript#track-utm-tags
+    if (urlParsed) {
+        if (urlParsed.searchParams.utm_source) postBody.properties['utm_source'] = urlParsed.searchParams.utm_source;
+        if (urlParsed.searchParams.utm_campaign) postBody.properties['utm_campaign'] = urlParsed.searchParams.utm_campaign;
+        if (urlParsed.searchParams.utm_medium) postBody.properties['utm_medium'] = urlParsed.searchParams.utm_medium;
+        if (urlParsed.searchParams.utm_term) postBody.properties['utm_term'] = urlParsed.searchParams.utm_term;
+        if (urlParsed.searchParams.utm_content) postBody.properties['utm_content'] = urlParsed.searchParams.utm_content;
+        if (urlParsed.searchParams.utm_id) postBody.properties['utm_id'] = urlParsed.searchParams.utm_id;
+        if (urlParsed.searchParams.utm_source_platform) postBody.properties['utm_source_platform'] = urlParsed.searchParams.utm_source_platform;
+        if (urlParsed.searchParams.utm_campaign_id) postBody.properties['utm_campaign_id'] = urlParsed.searchParams.utm_campaign_id;
+        if (urlParsed.searchParams.utm_creative_format) postBody.properties['utm_creative_format'] = urlParsed.searchParams.utm_creative_format;
+        if (urlParsed.searchParams.utm_marketing_tactic) postBody.properties['utm_marketing_tactic'] = urlParsed.searchParams.utm_marketing_tactic;
+
+        if (urlParsed.searchParams.dclid) postBody.properties['dclid'] = urlParsed.searchParams.dclid;
+        if (urlParsed.searchParams.fbclid) postBody.properties['fbclid'] = urlParsed.searchParams.fbclid;
+        if (urlParsed.searchParams.gclid) postBody.properties['gclid'] = urlParsed.searchParams.gclid;
+        if (urlParsed.searchParams.ko_click_id) postBody.properties['ko_click_id'] = urlParsed.searchParams.ko_click_id;
+        if (urlParsed.searchParams.li_fat_id) postBody.properties['li_fat_id'] = urlParsed.searchParams.li_fat_id;
+        if (urlParsed.searchParams.msclkid) postBody.properties['msclkid'] = urlParsed.searchParams.msclkid;
+        if (urlParsed.searchParams.sccid) postBody.properties['sccid'] = urlParsed.searchParams.sccid;
+        if (urlParsed.searchParams.ttclid) postBody.properties['ttclid'] = urlParsed.searchParams.ttclid;
+        if (urlParsed.searchParams.twclid) postBody.properties['twclid'] = urlParsed.searchParams.twclid;
+        if (urlParsed.searchParams.wbraid) postBody.properties['wbraid'] = urlParsed.searchParams.wbraid;
+    }
 
     if (postBody.properties['$referrer']) {
         let searchEngine = getSearchEngine(postBody.properties['$referrer']);
