@@ -1,5 +1,8 @@
 homepage: 'https://stape.io/'
+documentation: 'https://github.com/stape-io/mixpanel-tag'
 versions:
+  - sha: de7a264ad3db4c77625e9331e8063844656d4beb
+    changeNotes: Added support for more UTMs and started collecting some Click IDs for feature parity with the SDKs.
   - sha: aac325a304aec10433b005e9507bf18cb29c9743
     changeNotes: Enhanced set-once user profile property support with improved UI configuration.
   - sha: 77f4014e15641af8677ee96b9a92b9ba42042989
