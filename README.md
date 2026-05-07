@@ -39,3 +39,6 @@ The **Mixpanel Tag for GTM Server Side** is developed and maintained by [Stape T
 Also, big thanks to our contributors:
 
 - [Mariusz Brucki](https://github.com/mbrucki)
+
+### GTM Gallery Status
+🟢 [Listed](https://tagmanager.google.com/gallery/#/owners/stape-io/templates/mixpanel-tag)
