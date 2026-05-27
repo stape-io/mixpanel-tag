@@ -25,7 +25,6 @@
 - `Get parameters from the variable` - extracts parameters from the sGTM variable.
 - `Additional Parameters` - add parameters you need to send to Mixpanel.
 - `Remove parameters from the request` - specify parameters you want to remove from the requests.
-- `Logs Settings` - enable to use stape logs.
 
 
 ## How to use
