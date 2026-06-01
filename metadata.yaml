@@ -1,6 +1,8 @@
 homepage: 'https://stape.io/'
 documentation: 'https://github.com/stape-io/mixpanel-tag'
 versions:
+  - sha: 5b451a476639101bf30c4995bcc7d936e6578361
+    changeNotes: Logging removal.
   - sha: 212dcf3c7cb7d18ce8257849a27be7bcad4ce997
     changeNotes: Added consent section.
   - sha: de7a264ad3db4c77625e9331e8063844656d4beb

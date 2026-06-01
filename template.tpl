@@ -403,34 +403,6 @@ ___TEMPLATE_PARAMETERS___
         "defaultValue": "optional"
       }
     ]
-  },
-  {
-    "displayName": "Logs Settings",
-    "name": "logsGroup",
-    "groupStyle": "ZIPPY_CLOSED",
-    "type": "GROUP",
-    "subParams": [
-      {
-        "type": "RADIO",
-        "name": "logType",
-        "radioItems": [
-          {
-            "value": "no",
-            "displayValue": "Do not log"
-          },
-          {
-            "value": "debug",
-            "displayValue": "Log to console during debug and preview"
-          },
-          {
-            "value": "always",
-            "displayValue": "Always log to console"
-          }
-        ],
-        "simpleValueType": true,
-        "defaultValue": "debug"
-      }
-    ]
   }
 ]
 
@@ -439,12 +411,10 @@ ___SANDBOXED_JS_FOR_SERVER___
 
 const generateRandom = require('generateRandom');
 const getAllEventData = require('getAllEventData');
-const getContainerVersion = require('getContainerVersion');
 const getCookieValues = require('getCookieValues');
 const getRequestHeader = require('getRequestHeader');
-const getTimestamp = require('getTimestamp');
+const getTimestampMillis = require('getTimestampMillis');
 const JSON = require('JSON');
-const logToConsole = require('logToConsole');
 const makeNumber = require('makeNumber');
 const makeString = require('makeString');
 const Object = require('Object');
@@ -456,10 +426,6 @@ const setCookie = require('setCookie');
 ==============================================================================*/
 
 const postUrl = 'https://' + (data.serverEU ? 'api-eu.mixpanel.com' : 'api.mixpanel.com');
-const containerVersion = getContainerVersion();
-const isDebug = containerVersion.debugMode;
-const isLoggingEnabled = determinateIsLoggingEnabled();
-const traceId = getRequestHeader('trace-id');
 const eventData = getAllEventData();
 
 if (!isConsentGivenOrNotRequired(data, eventData)) {
@@ -508,6 +474,7 @@ function sendAppendProfileRequest() {
     propertiesToAppend[row.propertyName].push(row.valueToAppend);
   });
 
+  // prettier-ignore
   const profileBody = {
     '$token': data.token,
     '$distinct_id': getDistinctId(),
@@ -516,37 +483,9 @@ function sendAppendProfileRequest() {
 
   const postUrlAppend = postUrl + '/engage#profile-list-append';
 
-  if (isLoggingEnabled) {
-    logToConsole(
-      JSON.stringify({
-        Name: 'Mixpanel',
-        Type: 'Request',
-        TraceId: traceId,
-        EventName: 'Profile Append',
-        RequestMethod: 'POST',
-        RequestUrl: postUrlAppend,
-        RequestBody: profileBody
-      })
-    );
-  }
-
   sendHttpRequest(
     postUrlAppend,
     (statusCode, headers, body) => {
-      if (isLoggingEnabled) {
-        logToConsole(
-          JSON.stringify({
-            Name: 'Mixpanel',
-            Type: 'Response',
-            TraceId: traceId,
-            EventName: 'Profile Append',
-            ResponseStatusCode: statusCode,
-            ResponseHeaders: headers,
-            ResponseBody: body
-          })
-        );
-      }
-
       if (statusCode >= 200 && statusCode < 400 && body && body === '1') {
         data.gtmOnSuccess();
       } else {
@@ -564,6 +503,7 @@ function sendSetProfileRequest() {
     userProperties[row.userProperty] = row.value;
   });
 
+  // prettier-ignore
   const profileBody = {
     '$token': data.token,
     '$distinct_id': getDistinctId(),
@@ -573,37 +513,9 @@ function sendSetProfileRequest() {
 
   const postUrlSet = postUrl + '/engage#profile-set';
 
-  if (isLoggingEnabled) {
-    logToConsole(
-      JSON.stringify({
-        Name: 'Mixpanel',
-        Type: 'Request',
-        TraceId: traceId,
-        EventName: 'Profile Set',
-        RequestMethod: 'POST',
-        RequestUrl: postUrlSet,
-        RequestBody: profileBody
-      })
-    );
-  }
-
   sendHttpRequest(
     postUrlSet,
     (statusCode, headers, body) => {
-      if (isLoggingEnabled) {
-        logToConsole(
-          JSON.stringify({
-            Name: 'Mixpanel',
-            Type: 'Response',
-            TraceId: traceId,
-            EventName: 'Profile Set',
-            ResponseStatusCode: statusCode,
-            ResponseHeaders: headers,
-            ResponseBody: body
-          })
-        );
-      }
-
       if (statusCode >= 200 && statusCode < 400 && body && body === '1') {
         data.gtmOnSuccess();
       } else {
@@ -621,6 +533,7 @@ function sendSetOnceProfileRequest() {
     userProperties[row.userProperty] = row.value;
   });
 
+  // prettier-ignore
   const profileBody = {
     '$token': data.token,
     '$distinct_id': getDistinctId(),
@@ -630,37 +543,9 @@ function sendSetOnceProfileRequest() {
 
   const postUrlSetOnce = postUrl + '/engage#profile-set-once';
 
-  if (isLoggingEnabled) {
-    logToConsole(
-      JSON.stringify({
-        Name: 'Mixpanel',
-        Type: 'Request',
-        TraceId: traceId,
-        EventName: 'Profile Set Once',
-        RequestMethod: 'POST',
-        RequestUrl: postUrlSetOnce,
-        RequestBody: profileBody
-      })
-    );
-  }
-
   sendHttpRequest(
     postUrlSetOnce,
     (statusCode, headers, body) => {
-      if (isLoggingEnabled) {
-        logToConsole(
-          JSON.stringify({
-            Name: 'Mixpanel',
-            Type: 'Response',
-            TraceId: traceId,
-            EventName: 'Profile Set Once',
-            ResponseStatusCode: statusCode,
-            ResponseHeaders: headers,
-            ResponseBody: body
-          })
-        );
-      }
-
       if (statusCode >= 200 && statusCode < 400 && body && body === '1') {
         data.gtmOnSuccess();
       } else {
@@ -695,12 +580,9 @@ function sendTrackRequest() {
 
   if (data.trackList) {
     data.trackList.forEach((d) => {
-      // Check if listValues is a string and have commas
       if (typeof d.listValues === 'string' && d.listValues.indexOf(',') !== -1) {
-        // Convert a string to an array of strings, removing whitespace characters and dividing by commas
         postBody.properties[d.listName] = d.listValues.split(',').map((tag) => tag.trim());
       } else {
-        // If it is not a comma-delimited string, assign the value of listValues unchanged
         postBody.properties[d.listName] = d.listValues;
       }
     });
@@ -725,6 +607,7 @@ function sendAliasRequest() {
 
 function sendIdentifyRequest() {
   sendRequest('$identify', {
+    // prettier-ignore
     properties: {
       '$identified_id': data.identifier,
       '$anon_id': getDistinctId()
@@ -750,37 +633,9 @@ function sendRequest(eventName, postBody) {
     'https://' + (data.serverEU ? 'api-eu.mixpanel.com' : 'api.mixpanel.com') + '/track?verbose=1';
   postBody = [postBody];
 
-  if (isLoggingEnabled) {
-    logToConsole(
-      JSON.stringify({
-        Name: 'Mixpanel',
-        Type: 'Request',
-        TraceId: traceId,
-        EventName: eventName,
-        RequestMethod: 'POST',
-        RequestUrl: postUrl,
-        RequestBody: postBody
-      })
-    );
-  }
-
   sendHttpRequest(
     postUrl,
     (statusCode, headers, body) => {
-      if (isLoggingEnabled) {
-        logToConsole(
-          JSON.stringify({
-            Name: 'Mixpanel',
-            Type: 'Response',
-            TraceId: traceId,
-            EventName: eventName,
-            ResponseStatusCode: statusCode,
-            ResponseHeaders: headers,
-            ResponseBody: body
-          })
-        );
-      }
-
       // Because of ?verbose=1
       let parsedBody;
       if (body) parsedBody = JSON.parse(body);
@@ -827,9 +682,10 @@ function setDistinctIdCookies(distinctId, deviceId) {
 
 function trackCommonData(postBody) {
   postBody = {
+    // prettier-ignore
     properties: {
-      'ip': eventData.ip_override || eventData.ip,
-      'mp_lib': 'stape',
+      ip: eventData.ip_override || eventData.ip,
+      mp_lib: 'stape',
       '$lib_version': '1.0.0'
     }
   };
@@ -1039,7 +895,7 @@ function random() {
 }
 
 function isConsentGivenOrNotRequired(data, eventData) {
-  if (data.adStorageConsent !== 'required') return true;
+  if (data.analyticsStorageConsent !== 'required') return true;
   if (eventData.consent_state) return !!eventData.consent_state.analytics_storage;
   const xGaGcs = eventData['x-ga-gcs'] || ''; // x-ga-gcs is a string like "G110"
   return xGaGcs[3] === '1'; // 4th character indicates analytics_storage consent
@@ -1047,7 +903,7 @@ function isConsentGivenOrNotRequired(data, eventData) {
 
 function UUID() {
   function s(n) {
-    return h((random() * (1 << (n << 2))) ^ getTimestamp()).slice(-n);
+    return h((random() * (1 << (n << 2))) ^ getTimestampMillis()).slice(-n);
   }
   function h(n) {
     return (n | 0).toString(16);
@@ -1057,24 +913,8 @@ function UUID() {
     s(4),
     '4' + s(3),
     h(8 | (random() * 4)) + s(3),
-    getTimestamp().toString(16).slice(-10) + s(2)
+    getTimestampMillis().toString(16).slice(-10) + s(2)
   ].join('-');
-}
-
-function determinateIsLoggingEnabled() {
-  if (!data.logType) {
-    return isDebug;
-  }
-
-  if (data.logType === 'no') {
-    return false;
-  }
-
-  if (data.logType === 'debug') {
-    return isDebug;
-  }
-
-  return data.logType === 'always';
 }
 
 
@@ -1093,21 +933,6 @@ ___SERVER_PERMISSIONS___
           "value": {
             "type": 2,
             "listItem": [
-              {
-                "type": 3,
-                "mapKey": [
-                  {
-                    "type": 1,
-                    "string": "headerName"
-                  }
-                ],
-                "mapValue": [
-                  {
-                    "type": 1,
-                    "string": "trace-id"
-                  }
-                ]
-              },
               {
                 "type": 3,
                 "mapKey": [
@@ -1179,37 +1004,6 @@ ___SERVER_PERMISSIONS___
     },
     "clientAnnotations": {
       "isEditedByUser": true
-    },
-    "isRequired": true
-  },
-  {
-    "instance": {
-      "key": {
-        "publicId": "logging",
-        "versionId": "1"
-      },
-      "param": [
-        {
-          "key": "environments",
-          "value": {
-            "type": 1,
-            "string": "all"
-          }
-        }
-      ]
-    },
-    "clientAnnotations": {
-      "isEditedByUser": true
-    },
-    "isRequired": true
-  },
-  {
-    "instance": {
-      "key": {
-        "publicId": "read_container_data",
-        "versionId": "1"
-      },
-      "param": []
     },
     "isRequired": true
   },
@@ -1447,6 +1241,8 @@ setup: ''
 
 ___NOTES___
 
-Created on 15/06/2022, 17:43:17
+2026-05-25 Change Notes:
+ - Logging removal.
 
+Created on 15/06/2022, 17:43:17
 
