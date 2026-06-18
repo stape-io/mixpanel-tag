@@ -11,9 +11,12 @@
 - Reset - resets identification of Mixpanel contact.
 
 
-> ⚠️ This tag currently supports only the **Original ID Merge** method of `ID Management`.
+> ✅ This tag supports **both** the **Original ID Merge** and the **Simplified ID Merge** methods of `ID Management`.
 >
-> An update to also support the **Simplified ID Merge** is already on our backlog.
+> Use the **ID Merge API** setting to match your project (check it under [Project Settings → Identity Merge](https://mixpanel.com/settings/project/id-management)). It defaults to **Original** for backwards compatibility.
+>
+> - **Original ID Merge** sends the reserved `$identify` / `$create_alias` events using `$anon_id` and `$identified_id`.
+> - **Simplified ID Merge** sends `$device_id` (anonymous) and, once known, `$user_id`, and lets Mixpanel derive the `distinct_id`. Set the **User ID ($user_id)** field on `track` / profile tags for logged-in users, and the `$device_id` ⇄ `$user_id` mapping is created automatically. The `alias` type is not used with Simplified ID Merge.
 >
 > Learn more: [ID Management](https://docs.mixpanel.com/docs/tracking-methods/id-management), [Original ID Merge](https://docs.mixpanel.com/docs/tracking-methods/id-management/identifying-users-original), [Simplified ID Merge](https://docs.mixpanel.com/docs/tracking-methods/id-management/identifying-users-simplified) and [Migrating to Simplified ID Merge](https://docs.mixpanel.com/docs/tracking-methods/id-management/migrating-to-simplified-id-merge-system)
 

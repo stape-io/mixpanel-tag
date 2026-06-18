@@ -46,6 +46,7 @@ if (data.type === 'track') {
   cookieOptions['max-age'] = 1;
   setCookie('stape_mixpanel_distinct_id', 'empty', cookieOptions);
   setCookie('stape_mixpanel_device_id', 'empty', cookieOptions);
+  setCookie('stape_mixpanel_user_id', 'empty', cookieOptions);
   data.gtmOnSuccess();
   return;
 }
@@ -66,7 +67,7 @@ function sendAppendProfileRequest() {
   // prettier-ignore
   const profileBody = {
     '$token': data.token,
-    '$distinct_id': getDistinctId(),
+    '$distinct_id': getCanonicalDistinctId(),
     '$append': propertiesToAppend
   };
 
@@ -95,7 +96,7 @@ function sendSetProfileRequest() {
   // prettier-ignore
   const profileBody = {
     '$token': data.token,
-    '$distinct_id': getDistinctId(),
+    '$distinct_id': getCanonicalDistinctId(),
     '$ip': eventData.ip_override || eventData.ip,
     '$set': userProperties
   };
@@ -125,7 +126,7 @@ function sendSetOnceProfileRequest() {
   // prettier-ignore
   const profileBody = {
     '$token': data.token,
-    '$distinct_id': getDistinctId(),
+    '$distinct_id': getCanonicalDistinctId(),
     '$ip': eventData.ip_override || eventData.ip,
     '$set_once': userProperties
   };
@@ -211,11 +212,26 @@ function sendRequest(eventName, postBody) {
   postBody.properties.token = data.token;
 
   if (data.type !== 'identify') {
-    postBody.properties.distinct_id = getDistinctId();
-    postBody.properties['$device_id'] = getDeviceId(postBody.properties.distinct_id);
+    if (data.idMergeApi === 'simplified') {
+      // Simplified ID Merge: send $device_id (anonymous) and, once known, $user_id, and let
+      // Mixpanel derive the canonical distinct_id. We intentionally do NOT set distinct_id —
+      // forcing it (e.g. to the raw device id) can detach anonymous events from the identity
+      // cluster Mixpanel builds at identification.
+      const deviceId = getAnonymousId();
+      const userId = getUserId();
 
-    if (data.identifyAuto)
-      setDistinctIdCookies(postBody.properties.distinct_id, postBody.properties['$device_id']);
+      postBody.properties['$device_id'] = deviceId;
+      if (userId) postBody.properties['$user_id'] = userId;
+
+      if (data.identifyAuto) setSimplifiedIdCookies(deviceId, userId);
+    } else {
+      // Original ID Merge (default): set distinct_id and $device_id directly.
+      postBody.properties.distinct_id = getDistinctId();
+      postBody.properties['$device_id'] = getDeviceId(postBody.properties.distinct_id);
+
+      if (data.identifyAuto)
+        setDistinctIdCookies(postBody.properties.distinct_id, postBody.properties['$device_id']);
+    }
   }
 
   const postUrl =
@@ -267,6 +283,45 @@ function getDeviceId(distinctId) {
 function setDistinctIdCookies(distinctId, deviceId) {
   setCookie('stape_mixpanel_distinct_id', makeString(distinctId), cookieOptions);
   setCookie('stape_mixpanel_device_id', makeString(deviceId), cookieOptions);
+}
+
+function getCanonicalDistinctId() {
+  // Distinct ID used as $distinct_id for profile (engage) updates.
+  if (data.idMergeApi !== 'simplified') return getDistinctId();
+
+  // In Simplified ID Merge the canonical distinct_id is the $user_id once the user is
+  // identified, otherwise the anonymous $device_id.
+  const userId = getUserId();
+  return userId ? userId : getAnonymousId();
+}
+
+function getAnonymousId() {
+  // The anonymous device identifier sent as $device_id (Simplified ID Merge).
+  if (!data.identifyAuto) return data.identifyCustom;
+
+  let mpData = getCookieValues('mp_' + data.token + '_mixpanel')[0];
+  if (mpData) return JSON.parse(mpData)['$device_id'];
+
+  let deviceIdCookie = getCookieValues('stape_mixpanel_device_id')[0];
+  if (deviceIdCookie && deviceIdCookie !== 'empty') return deviceIdCookie;
+
+  return UUID();
+}
+
+function getUserId() {
+  // The authenticated identifier sent as $user_id, or undefined for anonymous hits.
+  if (data.userId) return data.userId;
+  if (!data.identifyAuto) return undefined;
+
+  let userIdCookie = getCookieValues('stape_mixpanel_user_id')[0];
+  if (userIdCookie && userIdCookie !== 'empty') return userIdCookie;
+
+  return undefined;
+}
+
+function setSimplifiedIdCookies(deviceId, userId) {
+  setCookie('stape_mixpanel_device_id', makeString(deviceId), cookieOptions);
+  if (userId) setCookie('stape_mixpanel_user_id', makeString(userId), cookieOptions);
 }
 
 function trackCommonData(postBody) {
