@@ -44,6 +44,32 @@ ___TEMPLATE_PARAMETERS___
   },
   {
     "type": "SELECT",
+    "name": "idMergeApi",
+    "displayName": "ID Merge API",
+    "macrosInSelect": false,
+    "selectItems": [
+      {
+        "value": "original",
+        "displayValue": "Original ID Merge"
+      },
+      {
+        "value": "simplified",
+        "displayValue": "Simplified ID Merge"
+      }
+    ],
+    "simpleValueType": true,
+    "defaultValue": "original",
+    "help": "Select the ID Management version of your Mixpanel project. You can check it under \u003ca href\u003d\"https://mixpanel.com/settings/project/id-management\" target\u003d\"_blank\"\u003eProject Settings \u003e Identity Merge\u003c/a\u003e.\u003cbr\u003e\u003cbr\u003e\u003cb\u003eOriginal ID Merge\u003c/b\u003e uses the \u0027$identify\u0027 / \u0027$create_alias\u0027 events with \u0027$anon_id\u0027 and \u0027$identified_id\u0027.\u003cbr\u003e\u003cb\u003eSimplified ID Merge\u003c/b\u003e sends \u0027$device_id\u0027 and \u0027$user_id\u0027 and lets Mixpanel derive the \u0027distinct_id\u0027. The \u0027alias\u0027 type is not used with Simplified ID Merge."
+  },
+  {
+    "type": "CHECKBOX",
+    "name": "serverEU",
+    "checkboxText": "Route data to Mixpanel\u0027s EU servers",
+    "simpleValueType": true,
+    "defaultValue": false
+  },
+  {
+    "type": "SELECT",
     "name": "type",
     "displayName": "Tag Type",
     "selectItems": [
@@ -81,25 +107,11 @@ ___TEMPLATE_PARAMETERS___
   },
   {
     "type": "CHECKBOX",
-    "name": "serverEU",
-    "checkboxText": "Route data to Mixpanel\u0027s EU servers",
-    "simpleValueType": true,
-    "defaultValue": false
-  },
-  {
-    "type": "CHECKBOX",
     "name": "identifyAuto",
     "checkboxText": "Automatically handle customer distinct_id",
     "simpleValueType": true,
     "help": "Mixpanel server API optimized for stateless shared usage; e.g., in a web application, the same mixpanel instance is used across requests for all users. Rather than setting a distinct_id through identify() calls like Mixpanel client-side libraries (where a single Mixpanel instance is tied to a single user), this api requires you to pass the distinct_id with every tracking call.",
-    "defaultValue": true,
-    "enablingConditions": [
-      {
-        "paramName": "type",
-        "paramValue": "reset",
-        "type": "NOT_EQUALS"
-      }
-    ]
+    "defaultValue": true
   },
   {
     "type": "TEXT",
@@ -193,6 +205,7 @@ ___TEMPLATE_PARAMETERS___
         "name": "identifier",
         "displayName": "Identifier",
         "simpleValueType": true,
+        "help": "The user\u0027s authenticated ID, sent as \u0027$identified_id\u0027 (\u003cb\u003eOriginal ID Merge\u003c/b\u003e). The identify tag is only used with Original ID Merge; on \u003cb\u003eSimplified ID Merge\u003c/b\u003e set the \u003cb\u003eUser ID ($user_id)\u003c/b\u003e field on your track tags instead.",
         "valueValidators": [
           {
             "type": "NON_EMPTY"
@@ -345,6 +358,28 @@ ___TEMPLATE_PARAMETERS___
   },
   {
     "type": "GROUP",
+    "name": "simplifiedIdMergeSettingsGroup",
+    "displayName": "Simplified ID Merge Settings",
+    "groupStyle": "ZIPPY_CLOSED",
+    "subParams": [
+      {
+        "type": "TEXT",
+        "name": "userId",
+        "displayName": "User ID ($user_id)",
+        "simpleValueType": true,
+        "help": "Simplified ID Merge only. Set this to the user\u0027s authenticated ID (e.g. your database ID) when it is known, and leave it empty for anonymous hits. When present it is sent as \u0027$user_id\u0027 and Mixpanel merges it with the anonymous \u0027$device_id\u0027 to form a single identity cluster. Tip: populate it from a variable that only resolves for logged-in users."
+      }
+    ],
+    "enablingConditions": [
+      {
+        "paramName": "idMergeApi",
+        "paramValue": "simplified",
+        "type": "EQUALS"
+      }
+    ]
+  },
+  {
+    "type": "GROUP",
     "name": "setOnceGroup",
     "displayName": "User Properties to Set Once",
     "groupStyle": "ZIPPY_OPEN",
@@ -457,6 +492,7 @@ if (data.type === 'track') {
   cookieOptions['max-age'] = 1;
   setCookie('stape_mixpanel_distinct_id', 'empty', cookieOptions);
   setCookie('stape_mixpanel_device_id', 'empty', cookieOptions);
+  setCookie('stape_mixpanel_user_id', 'empty', cookieOptions);
   data.gtmOnSuccess();
   return;
 }
@@ -477,7 +513,7 @@ function sendAppendProfileRequest() {
   // prettier-ignore
   const profileBody = {
     '$token': data.token,
-    '$distinct_id': getDistinctId(),
+    '$distinct_id': getCanonicalDistinctId(),
     '$append': propertiesToAppend
   };
 
@@ -506,7 +542,7 @@ function sendSetProfileRequest() {
   // prettier-ignore
   const profileBody = {
     '$token': data.token,
-    '$distinct_id': getDistinctId(),
+    '$distinct_id': getCanonicalDistinctId(),
     '$ip': eventData.ip_override || eventData.ip,
     '$set': userProperties
   };
@@ -536,7 +572,7 @@ function sendSetOnceProfileRequest() {
   // prettier-ignore
   const profileBody = {
     '$token': data.token,
-    '$distinct_id': getDistinctId(),
+    '$distinct_id': getCanonicalDistinctId(),
     '$ip': eventData.ip_override || eventData.ip,
     '$set_once': userProperties
   };
@@ -622,11 +658,26 @@ function sendRequest(eventName, postBody) {
   postBody.properties.token = data.token;
 
   if (data.type !== 'identify') {
-    postBody.properties.distinct_id = getDistinctId();
-    postBody.properties['$device_id'] = getDeviceId(postBody.properties.distinct_id);
+    if (data.idMergeApi === 'simplified') {
+      // Simplified ID Merge: send $device_id (anonymous) and, once known, $user_id, and let
+      // Mixpanel derive the canonical distinct_id. We intentionally do NOT set distinct_id —
+      // forcing it (e.g. to the raw device id) can detach anonymous events from the identity
+      // cluster Mixpanel builds at identification.
+      const deviceId = getAnonymousId();
+      const userId = getUserId();
 
-    if (data.identifyAuto)
-      setDistinctIdCookies(postBody.properties.distinct_id, postBody.properties['$device_id']);
+      postBody.properties['$device_id'] = deviceId;
+      if (userId) postBody.properties['$user_id'] = userId;
+
+      if (data.identifyAuto) setSimplifiedIdCookies(deviceId, userId);
+    } else {
+      // Original ID Merge (default): set distinct_id and $device_id directly.
+      postBody.properties.distinct_id = getDistinctId();
+      postBody.properties['$device_id'] = getDeviceId(postBody.properties.distinct_id);
+
+      if (data.identifyAuto)
+        setDistinctIdCookies(postBody.properties.distinct_id, postBody.properties['$device_id']);
+    }
   }
 
   const postUrl =
@@ -678,6 +729,45 @@ function getDeviceId(distinctId) {
 function setDistinctIdCookies(distinctId, deviceId) {
   setCookie('stape_mixpanel_distinct_id', makeString(distinctId), cookieOptions);
   setCookie('stape_mixpanel_device_id', makeString(deviceId), cookieOptions);
+}
+
+function getCanonicalDistinctId() {
+  // Distinct ID used as $distinct_id for profile (engage) updates.
+  if (data.idMergeApi !== 'simplified') return getDistinctId();
+
+  // In Simplified ID Merge the canonical distinct_id is the $user_id once the user is
+  // identified, otherwise the anonymous $device_id.
+  const userId = getUserId();
+  return userId ? userId : getAnonymousId();
+}
+
+function getAnonymousId() {
+  // The anonymous device identifier sent as $device_id (Simplified ID Merge).
+  if (!data.identifyAuto) return data.identifyCustom;
+
+  let mpData = getCookieValues('mp_' + data.token + '_mixpanel')[0];
+  if (mpData) return JSON.parse(mpData)['$device_id'];
+
+  let deviceIdCookie = getCookieValues('stape_mixpanel_device_id')[0];
+  if (deviceIdCookie && deviceIdCookie !== 'empty') return deviceIdCookie;
+
+  return UUID();
+}
+
+function getUserId() {
+  // The authenticated identifier sent as $user_id, or undefined for anonymous hits.
+  if (data.userId) return data.userId;
+  if (!data.identifyAuto) return undefined;
+
+  let userIdCookie = getCookieValues('stape_mixpanel_user_id')[0];
+  if (userIdCookie && userIdCookie !== 'empty') return userIdCookie;
+
+  return undefined;
+}
+
+function setSimplifiedIdCookies(deviceId, userId) {
+  setCookie('stape_mixpanel_device_id', makeString(deviceId), cookieOptions);
+  if (userId) setCookie('stape_mixpanel_user_id', makeString(userId), cookieOptions);
 }
 
 function trackCommonData(postBody) {
@@ -1161,6 +1251,53 @@ ___SERVER_PERMISSIONS___
                 "mapValue": [
                   {
                     "type": 1,
+                    "string": "stape_mixpanel_user_id"
+                  },
+                  {
+                    "type": 1,
+                    "string": "*"
+                  },
+                  {
+                    "type": 1,
+                    "string": "*"
+                  },
+                  {
+                    "type": 1,
+                    "string": "any"
+                  },
+                  {
+                    "type": 1,
+                    "string": "any"
+                  }
+                ]
+              },
+              {
+                "type": 3,
+                "mapKey": [
+                  {
+                    "type": 1,
+                    "string": "name"
+                  },
+                  {
+                    "type": 1,
+                    "string": "domain"
+                  },
+                  {
+                    "type": 1,
+                    "string": "path"
+                  },
+                  {
+                    "type": 1,
+                    "string": "secure"
+                  },
+                  {
+                    "type": 1,
+                    "string": "session"
+                  }
+                ],
+                "mapValue": [
+                  {
+                    "type": 1,
                     "string": "stape_mixpanel_initial_referrer"
                   },
                   {
@@ -1245,4 +1382,3 @@ ___NOTES___
  - Logging removal.
 
 Created on 15/06/2022, 17:43:17
-
